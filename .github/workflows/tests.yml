@@ -1,0 +1,127 @@
+# Test tiers (see tests/conftest.py):
+#   unit    NumPy only; every push and pull request, several Python versions
+#   grib    + grib2io/NCEPLIBS-g2c; every push and pull request
+#   legacy  + the compiled Fortran fbwndgfs.F, run side by side with the port;
+#           weekly, on demand (Actions tab), and on any push or pull request
+#           whose commit message / title contains "[legacy]"
+#
+# Actions are pinned to commit SHAs (tag in the trailing comment) so a moved
+# tag cannot change what runs here.
+
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 7 * * 1" # Mondays 07:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  unit:
+    name: unit (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install (without grib2io)
+        run: |
+          python -m pip install numpy pytest
+          python -m pip install --no-deps -e .
+      - name: Test
+        run: python -m pytest -ra
+
+  grib:
+    name: grib (grib2io + g2c)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libaec-dev libpng-dev libopenjp2-7-dev
+      - name: Cache g2c and the grib2io wheel
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/nceplibs
+            ~/.cache/pip
+          key: grib2io-${{ runner.os }}-py3.12-${{ hashFiles('ci/install_grib2io.sh') }}
+      - name: Install
+        run: |
+          python -m pip install numpy pytest pytest-cov
+          ci/install_grib2io.sh ~/nceplibs
+          python -m pip install -e .
+          echo "LD_LIBRARY_PATH=$HOME/nceplibs/lib" >> "$GITHUB_ENV"
+      - name: Test
+        run: python -m pytest -ra --cov=fbwndgfs --cov-report=term-missing
+
+  legacy:
+    name: legacy (vs compiled Fortran)
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[legacy]') ||
+      contains(github.event.pull_request.title, '[legacy]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gfortran libaec-dev libpng-dev libopenjp2-7-dev liblapack-dev libopenblas-dev
+      - name: Cache g2c and the grib2io wheel
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/nceplibs
+            ~/.cache/pip
+          key: grib2io-${{ runner.os }}-py3.12-${{ hashFiles('ci/install_grib2io.sh') }}
+      - name: Cache the Fortran reference
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/legacy/bin
+          key: legacy-${{ runner.os }}-${{ hashFiles('tests/legacy/build_legacy.sh', 'tests/legacy/*.f90') }}
+      - name: Install
+        run: |
+          python -m pip install numpy pytest
+          ci/install_grib2io.sh ~/nceplibs
+          python -m pip install -e .
+          echo "LD_LIBRARY_PATH=$HOME/nceplibs/lib" >> "$GITHUB_ENV"
+      - name: Build the Fortran reference
+        run: |
+          if [ ! -x ~/legacy/bin/fbwndgfs.x ]; then tests/legacy/build_legacy.sh ~/legacy; fi
+          echo "FBWNDGFS_LEGACY_DIR=$HOME/legacy/bin" >> "$GITHUB_ENV"
+      - name: Test (Python port vs Fortran, byte for byte)
+        run: python -m pytest -ra tests/test_legacy_live.py tests/test_grib.py

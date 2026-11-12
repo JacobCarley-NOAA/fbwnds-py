@@ -48,7 +48,7 @@ records.
 | `READ(5,10)` loop, `FORMAT(A1,A1,A4,1X,I5,1X,F6.2,1X,F7.2)` | `stations.parse_station_line` | Fortran edit-descriptor rules kept: blanks ignored in numeric fields, blank field = 0, `Fw.2` without a decimal point implies two decimals. Verified against the Fortran with such records in `tests/data/stress.stnlist`. |
 | `KTAU`, `IDWD1H/P`, `IDWD2H/P`, `IDWD2`, `NHGT6`, `NHGTP`, `NFDHDG`, `NCATNR`, `AWIPSID` | `constants.py` | Transcribed. |
 | `GETGB` with `MPDS(5,6,7,14)` | `gribio.Grib2Source.get` | GRIB1 table 2 numbers 33/34/11 → GRIB2 (0,2,2)/(0,2,3)/(0,0,0); level type 103 → surface type 102, 100 → 100 (Pa); `P1` → forecast time. First match wins, as with `JREW=0`. |
-| `GDSWZD_GRIB1(KGDS,-1,…)` | `grid.LatLonGrid.earth_to_grid` | Same expressions as `ip_equid_cylind_grid_mod` (`init_grib2`, `IOPT=-1`), including the `DLON_OFFSET` handling and the acceptance window `0 ≤ x ≤ IM+1(+1 if global)`. |
+| `GDSWZD_GRIB1(KGDS,-1,…)` | `grid.LatLonGrid.earth_to_grid` | Same expressions as `ip_equid_cylind_grid_mod` (`IOPT=-1`) of **released** NCEPLIBS-ip (v5.4.1), and the acceptance window `0 ≤ x ≤ IM+1(+1 if global)`. See §7 for the post-release `DLON_OFFSET` change. |
 | `RFLD(I)*1.94254`, `RFLD(I)-273.15` | `core.interpolate_tau` | Applied before interpolation, as in the Fortran. |
 | `W3FT01(ISTN,JSTN,RINTRP,X,IMAX,JMAX,0,0)` | `w3emc.w3ft01` | Full port including the cyclic branches the program never uses. |
 | `KSTNU(S,L)=X*100.0` | `encode.to_hundredths` | Truncation toward zero. |
@@ -71,8 +71,8 @@ literals such as `1.94254` and `57.2957795` are doubles there too.
 ## 3. Defects found in the Fortran
 
 All three were reproduced with an executable built from the unmodified
-source (gfortran 13.3, NCEPLIBS-w3emc `02cf4c8`, NCEPLIBS-ip `06ccb44`,
-NCEPLIBS-bacio `c4adc7e`). None was inferred from reading alone.
+source (gfortran 13.3; NCEPLIBS-bacio v2.6.0, -w3emc v2.13.0, -ip v5.4.1,
+-grib_util v1.5.0; -g2c v2.3.0 and grib2io 2.8.2 on the Python side). None was inferred from reading alone.
 
 ### 3.1 Interpolation uses fixed grid dimensions (affects the numbers)
 
@@ -261,5 +261,14 @@ framing; error paths.
   move a value across a truncation boundary; it did not in any test.
 - The reference executable was built with gfortran, not the Intel compiler
   used operationally.
+- **Byte-exact agreement depends on the library versions.** NCEPLIBS-ip
+  changed `DLON` after v5.4.1 from `MOD(span-1+3600,360.)+1` to
+  `MOD(span-1e-2+3600,360.)+1e-2`. That is the same number in exact
+  arithmetic, but it differs in the last bit. In the live tests one
+  temperature out of ~4,000 groups (station Q06, 30000 ft, seed 104) sat on
+  the −32.5 °C rounding boundary and came out `-33` with one form and `-32`
+  with the other. The port follows the released form; against an executable
+  linked with a newer ip such a group can differ by one unit. This is
+  last-bit noise, not a difference in method.
 - `make_ntc_bull.pl` was read, not run: the output format is identical to
   the Fortran's, so it should need no change.

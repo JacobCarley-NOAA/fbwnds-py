@@ -14,8 +14,14 @@ from typing import Sequence
 
 from .errors import UnsupportedGridError
 
-#: ``DLON_OFFSET`` in NCEPLIBS-ip ``ip_constants_mod``.
-_DLON_OFFSET = 1.0e-2
+#: Offset in the ``DLON`` expression of NCEPLIBS-ip ``ip_equid_cylind_grid_mod``.
+#:
+#: Released NCEPLIBS-ip (through v5.4.1) uses 1; the unreleased develop
+#: branch changed it to 1e-2 (``DLON_OFFSET``).  The two are equal in exact
+#: arithmetic but round differently in the last bit, which can move an
+#: interpolated value across a rounding boundary.  The released form is used
+#: because that is what operational executables link.
+_DLON_OFFSET = 1.0
 
 
 def _fmod(a: float, b: float) -> float:

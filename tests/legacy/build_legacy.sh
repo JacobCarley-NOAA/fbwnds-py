@@ -21,6 +21,11 @@ WORK=${1:?usage: build_legacy.sh <work-dir>}
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 FC=${FC:-gfortran}
 GFS_UTILS_COMMIT=8282140861731e07ffd30fe51a5de958e5e0b863
+# Library releases the golden files were checked against; override to test others.
+BACIO_REF=${BACIO_REF:-v2.6.0}
+W3EMC_REF=${W3EMC_REF:-v2.13.0}
+IP_REF=${IP_REF:-v5.4.1}
+GRIB_UTIL_REF=${GRIB_UTIL_REF:-v1.5.0}
 
 mkdir -p "$WORK"/{src,build,bin}
 WORK=$(cd "$WORK" && pwd)
@@ -33,10 +38,10 @@ clone() {  # clone <org/repo> [commit]
 }
 
 clone NOAA-EMC/gfs-utils "$GFS_UTILS_COMMIT"
-clone NOAA-EMC/NCEPLIBS-bacio
-clone NOAA-EMC/NCEPLIBS-w3emc
-clone NOAA-EMC/NCEPLIBS-ip
-clone NOAA-EMC/NCEPLIBS-grib_util
+clone NOAA-EMC/NCEPLIBS-bacio "$BACIO_REF"
+clone NOAA-EMC/NCEPLIBS-w3emc "$W3EMC_REF"
+clone NOAA-EMC/NCEPLIBS-ip "$IP_REF"
+clone NOAA-EMC/NCEPLIBS-grib_util "$GRIB_UTIL_REF"
 
 build() {  # build <repo> [cmake options...]
   local name=$1; shift

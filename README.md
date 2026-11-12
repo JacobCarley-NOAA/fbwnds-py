@@ -230,7 +230,8 @@ in the WMO heading.
 ## Tests
 
 ```bash
-python -m pytest                      # 244 tests, ~15 s
+pip install numpy pytest && pip install --no-deps -e .
+python -m pytest                      # unit tier, ~1 s
 ```
 
 | Tier | Needs | What it checks |
@@ -239,15 +240,32 @@ python -m pytest                      # 244 tests, ~15 s
 | `grib` (16 tests) | grib2io | GRIB2 selection rules, command line, and **byte-for-byte agreement with two outputs of the compiled Fortran** stored in `tests/data/*.tran` |
 | `legacy` (9 tests) | compiled Fortran | generates fresh random inputs, runs the Fortran and the port, requires identical files |
 
-To run the `legacy` tier:
+Tiers whose requirements are missing are skipped, not failed.
 
 ```bash
-tests/legacy/build_legacy.sh /tmp/legacy          # ~1 min; needs gfortran, cmake, BLAS/LAPACK
-FBWNDGFS_LEGACY_DIR=/tmp/legacy/bin python -m pytest
+ci/install_grib2io.sh ~/nceplibs                  # g2c v2.3.0 + grib2io 2.8.2 from source
+export LD_LIBRARY_PATH=~/nceplibs/lib
+tests/legacy/build_legacy.sh ~/legacy             # ~1 min; gfortran, cmake, BLAS/LAPACK
+FBWNDGFS_LEGACY_DIR=~/legacy/bin python -m pytest # all 253, ~2 min
 ```
 
-Line coverage of the package is 98 %; the uncovered lines are defensive
-branches in `gribio.py`.
+Both scripts pin library releases (NCEPLIBS-bacio v2.6.0, -w3emc v2.13.0,
+-ip v5.4.1, -grib_util v1.5.0, -g2c v2.3.0); override with `*_REF`
+environment variables to test others. Line coverage of the package is 98 %.
+
+### Continuous integration
+
+`.github/workflows/tests.yml` runs on GitHub Actions:
+
+| Job | When |
+|---|---|
+| `unit` on Python 3.10–3.13 | every push to `main` and every pull request |
+| `grib` (with coverage) | every push to `main` and every pull request |
+| `legacy` (Python vs. compiled Fortran) | Mondays, on demand from the Actions tab, or when a commit message or PR title contains `[legacy]` |
+
+Builds are cached, so after the first run `grib` takes a minute or two and
+`legacy` a few. Actions are pinned to commit SHAs and the workflow token is
+read-only.
 
 **Not tested:** real GFS files (the build machine had no access to NOMADS).
 The synthetic GRIB2 files use the same grid, parameters, levels and
