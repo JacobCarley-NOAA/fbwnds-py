@@ -263,8 +263,8 @@ environment variables to test others. Line coverage of the package is 98 %.
 | `grib` (with coverage) | every push to `main` and every pull request |
 | `legacy` (Python vs. compiled Fortran) | Mondays, on demand from the Actions tab, or when a commit message or PR title contains `[legacy]` |
 
-Builds are cached, so after the first run `grib` takes a minute or two and
-`legacy` a few. Actions are pinned to commit SHAs and the workflow token is
+`grib` builds g2c and grib2io fresh each time (a few minutes); `legacy` caches
+the Fortran build. Actions are pinned to commit SHAs and the workflow token is
 read-only.
 
 **Not tested:** real GFS files (the build machine had no access to NOMADS).

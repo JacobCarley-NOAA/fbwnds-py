@@ -4,8 +4,10 @@
 #   ci/install_grib2io.sh <prefix>
 #
 # grib2io publishes no Linux wheels, so it is built from source against a
-# g2c shared library installed under <prefix>.  NCEPLIBS-ip is optional for
-# grib2io and not needed by fbwndgfs, so it is not built.
+# g2c shared library installed under <prefix>.  fbwndgfs does not use
+# grib2io's interpolation, so it is built without NCEPLIBS-ip.  (grib2io's
+# GRIB2IO_WITH_IP option defaults to ON and then *requires* ip_d, so it has
+# to be switched off explicitly.)
 #
 # Needs: git, cmake >= 3.18, a C compiler, libaec, libpng and openjpeg
 # development headers (Ubuntu: libaec-dev libpng-dev libopenjp2-7-dev).
@@ -28,5 +30,7 @@ cmake -S "$SRC/g2c" -B "$SRC/build" \
       -DUSE_Jasper=OFF -DUSE_OpenJPEG=ON -DUSE_AEC=ON -DUSE_PNG=ON > "$SRC/cmake.log"
 cmake --build "$SRC/build" --target install -j 4 > "$SRC/build.log"
 
-G2C_DIR=$PREFIX python -m pip install --no-binary grib2io "grib2io==$GRIB2IO_VERSION"
+# --no-cache-dir: never reuse a grib2io wheel built elsewhere with other options.
+G2C_DIR=$PREFIX python -m pip install --no-cache-dir --no-binary grib2io \
+    --config-settings=cmake.define.GRIB2IO_WITH_IP=OFF "grib2io==$GRIB2IO_VERSION"
 echo "g2c $G2C_REF and grib2io $GRIB2IO_VERSION installed; add $PREFIX/lib to LD_LIBRARY_PATH"
