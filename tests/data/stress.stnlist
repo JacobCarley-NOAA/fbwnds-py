@@ -1,0 +1,94 @@
+B NP1      0  87.85   10.07 # y in first row interval
+  NP2     12   8750   20013 # y = 3
+  SP1      0 -87.60   45.11 # y within 3 rows of last
+  SP2      9 -87.85  300.01 # y in last row interval
+  WE1      3  12.34    0.05 # x in first column interval
+  WE2      3  -3321      30 # x = 2.5
+  EE1      3  44.44  351.50 # x within 3 columns of last
+  EE2      3  -5.55  351.75 # x in last column interval
+  EE3      3  21.21   -8.30 # west longitude -> 351.70
+  NOD      5   7.90  100.00 # exactly on a grid node
+  CLM1     7   0.33  170.17 # calm band
+  CLM2     7  -0.71 -140.29 # calm band
+  CLM3     7   1.13   33.37 # calm band
+  E15   1500  35.11  250.33 # elev 1500
+  E15A  1501  35.11  250.33 # elev 1501: 3000 ft wind blank
+  E35   3500 -20.37  290.11 # elev 3500
+  E35A  3501 -20.37  290.11 # elev 3501: 6000 ft temp blank
+  E45   4500  46.77   10.21 # elev 4500
+  E45A  4501  46.77   10.21 # elev 4501: 6000 ft wind blank
+  E65   6500  39.51  254.07 # elev 6500
+  E65A  6501  39.51  254.07 # elev 6501: 9000 ft temp blank
+  E75   7500 -13.53  288.03 # elev 7500
+  E75A  7501 -13.53  288.03 # elev 7501: 9000 ft wind blank
+  E95   9500  29.67   91.13 # elev 9500
+  E95A  9501  29.67   91.13 # elev 9501: 12000 ft temp blank
+  E105 10500 -16.51  291.83 # elev 10500
+  E10A 10501 -16.51  291.83 # elev 10501: 12000 ft wind blank
+  HIGH 13000  28.01   86.93 # elev 13000
+  NEG     -5  31.57   35.47 # negative elevation
+  R00     25 -20.07  324.88 # random
+  R01      3  44.75  137.33 # random
+  R02    900 -55.04 -148.22 # random
+  R03   2200   1618   19628 # random
+E R04   2200 -70.97  203.66 # random
+B NEG     -5  31.57   35.47 # negative elevation
+  HIGH 13000  28.01   86.93 # elev 13000
+  E10A 10501 -16.51  291.83 # elev 10501: 12000 ft wind blank
+  E105 10500 -16.51  291.83 # elev 10500
+  E95A  9501  29.67   91.13 # elev 9501: 12000 ft temp blank
+  E95   9500  29.67   91.13 # elev 9500
+  E75A  7501 -13.53  288.03 # elev 7501: 9000 ft wind blank
+  E75   7500 -13.53  288.03 # elev 7500
+  E65A  6501  39.51  254.07 # elev 6501: 9000 ft temp blank
+  E65   6500  39.51  254.07 # elev 6500
+  E45A  4501  46.77   10.21 # elev 4501: 6000 ft wind blank
+  E45   4500  46.77   10.21 # elev 4500
+  E35A  3501 -20.37  290.11 # elev 3501: 6000 ft temp blank
+  E35   3500 -20.37  290.11 # elev 3500
+  E15A  1501  35.11  250.33 # elev 1501: 3000 ft wind blank
+  E15   1500  35.11  250.33 # elev 1500
+  CLM3     7   1.13   33.37 # calm band
+  CLM2     7  -0.71 -140.29 # calm band
+  CLM1     7   0.33  170.17 # calm band
+  NOD      5   7.90  100.00 # exactly on a grid node
+  EE3      3  21.21   -8.30 # west longitude -> 351.70
+  EE2      3  -5.55  351.75 # x in last column interval
+  EE1      3  44.44  351.50 # x within 3 columns of last
+  WE2      3  -3321      30 # x = 2.5
+  WE1      3  12.34    0.05 # x in first column interval
+  SP2      9 -87.85  300.01 # y in last row interval
+  SP1      0 -87.60   45.11 # y within 3 rows of last
+  NP2     12   8750   20013 # y = 3
+  NP1      0  87.85   10.07 # y in first row interval
+  Q00    900 -46.03  -82.63 # random
+  Q01    900  18.80  145.18 # random
+  Q02     25 -10.89  -24.65 # random
+  Q03    180 -16.02 -154.27 # random
+  Q04   2200 -21.38   62.72 # random
+  Q05      0 -48.05   93.54 # random
+  Q06    900 -72.57  143.00 # random
+  Q07      0   -792  -17197 # random
+  Q08      0  74.50  249.45 # random
+  Q09    180 -77.45  -56.63 # random
+  Q10    900  -9.58 -114.32 # random
+  Q11      0  53.31  -87.12 # random
+  Q12      3 -38.60  172.14 # random
+  Q13    180 -11.98  -68.79 # random
+  Q14      3 -50.42  334.88 # random
+  Q15    180  -8.04   30.43 # random
+  Q16   2200  15.66  309.59 # random
+  Q17    900 -48.64 -155.03 # random
+  Q18    900 -17.81  -35.19 # random
+  Q19    180  13.88  332.59 # random
+  Q20    900   6.83 -104.31 # random
+  Q21      0 -68.07  344.05 # random
+  Q22     25 -48.21 -176.07 # random
+  Q23     25 -48.19  198.01 # random
+  Q24      3  43.40 -139.76 # random
+  Q25    180 -61.46  278.44 # random
+  Q26   2200 -27.06 -145.31 # random
+  Q27   2200 -27.97  207.69 # random
+  Q28    900  61.95   71.27 # random
+  Q29    900  75.47  270.92 # random
+E Q30     25   9.80  229.61 # random

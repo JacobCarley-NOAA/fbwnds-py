@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fbwndgfs"
+version = "1.0.0"
+description = "GFS winds and temperatures aloft bulletins for the Pacific (Python port of NCEP FBWNDGFS)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.22",
+    "grib2io>=2.2",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+fbwndgfs = "fbwndgfs.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "grib: needs grib2io (NCEPLIBS-g2c)",
+    "legacy: needs the compiled Fortran reference (FBWNDGFS_LEGACY_DIR)",
+]
